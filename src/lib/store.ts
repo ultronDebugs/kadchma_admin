@@ -85,7 +85,18 @@ type AppState = {
   retryToast: (id: string, payload: PendingConfirm) => void;
 
   exportCsv: (rows: EnrollmentRecord[]) => void;
+
+  hydrateFromLive: () => Promise<void>;
 };
+
+function reviveRecordDates(r: EnrollmentRecord): EnrollmentRecord {
+  return {
+    ...r,
+    dob: new Date(r.dob),
+    expiry: new Date(r.expiry),
+    history: r.history.map((h) => ({ ...h, at: new Date(h.at) })),
+  };
+}
 
 function updateEnrollmentStatus(failNext: boolean): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -269,6 +280,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     a.click();
     URL.revokeObjectURL(a.href);
     get().pushToast({ kind: "ok", title: "Export ready", body: `${rows.length} filtered records exported to CSV.` });
+  },
+
+  hydrateFromLive: async () => {
+    try {
+      const res = await fetch("/api/enrollments");
+      const json = (await res.json()) as { configured: boolean; records: EnrollmentRecord[] };
+      if (json.configured && json.records.length > 0) {
+        set({ records: json.records.map(reviveRecordDates) });
+      }
+    } catch {
+      // No live source configured or reachable — keep the demo data.
+    }
   },
 }));
 

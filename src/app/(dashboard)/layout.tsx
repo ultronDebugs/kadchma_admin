@@ -6,6 +6,7 @@ import { StatusConfirmDialog } from "@/components/enrollment/status-confirm-dial
 import { UserDialog } from "@/components/users/user-dialog";
 import { Toaster } from "@/components/toaster";
 import { DevPanel } from "@/components/dev-panel";
+import { LiveDataHydrator } from "@/components/live-data-hydrator";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -23,6 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <UserDialog />
       <Toaster />
       <DevPanel />
+      <LiveDataHydrator />
     </SidebarProvider>
   );
 }
