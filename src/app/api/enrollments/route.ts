@@ -88,6 +88,8 @@ export async function POST(req: NextRequest) {
       payment_proof_note: str(body.payment_proof_note),
       status: str(body.status),
       enrolled_at: str(body.enrolled_at),
+      contact_channel: str(body.contact_channel) || "WhatsApp",
+      contact_id: str(body.contact_id),
       next_of_kin_name: str(body.next_of_kin_name),
       next_of_kin_phone: str(body.next_of_kin_phone),
       next_of_kin_relationship: str(body.next_of_kin_relationship),

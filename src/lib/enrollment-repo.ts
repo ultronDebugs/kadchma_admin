@@ -21,6 +21,8 @@ export type StoredEnrollment = {
   payment_proof_note: string;
   status: string;
   enrolled_at: string; // ISO 8601
+  contact_channel: string; // "WhatsApp" | "Instagram"
+  contact_id: string; // platform sender id, for resending messages
   next_of_kin_name: string;
   next_of_kin_phone: string;
   next_of_kin_relationship: string;
@@ -54,4 +56,17 @@ export async function findByNin(nin: string): Promise<StoredEnrollment[]> {
 export async function insertEnrollment(doc: Omit<StoredEnrollment, "created_at">): Promise<void> {
   const col = await collection();
   await col.insertOne({ ...doc, created_at: new Date() });
+}
+
+export async function findByEnrollmentId(id: string): Promise<StoredEnrollment | null> {
+  const col = await collection();
+  return col.findOne({ enrollment_id: id }, PROJECT_OUT_ID);
+}
+
+export async function updateEnrollmentByEnrollmentId(
+  id: string,
+  patch: Partial<Omit<StoredEnrollment, "enrollment_id" | "created_at">>,
+): Promise<StoredEnrollment | null> {
+  const col = await collection();
+  return col.findOneAndUpdate({ enrollment_id: id }, { $set: patch }, { returnDocument: "after", projection: { _id: 0 } });
 }

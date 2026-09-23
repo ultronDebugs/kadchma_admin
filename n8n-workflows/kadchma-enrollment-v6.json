@@ -224,7 +224,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"first_name\": {{ JSON.stringify($fromAI(\"first_name\", \"Enrollee's first name\")) }},\n  \"last_name\": {{ JSON.stringify($fromAI(\"last_name\", \"Enrollee's last name\")) }},\n  \"other_name\": {{ JSON.stringify($fromAI(\"other_name\", \"Enrollee's middle/other name, empty string if not provided\")) }},\n  \"phone_number\": {{ JSON.stringify($fromAI(\"phone_number\", \"Enrollee phone number\")) }},\n  \"date_of_birth\": {{ JSON.stringify($fromAI(\"date_of_birth\", \"Date of birth in DD/MM/YYYY format\")) }},\n  \"gender\": {{ JSON.stringify($fromAI(\"gender\", \"Gender: Male or Female\")) }},\n  \"address\": {{ JSON.stringify($fromAI(\"address\", \"Residential address of the enrollee\")) }},\n  \"plan_type\": {{ JSON.stringify($fromAI(\"plan_type\", \"Plan type: Individual or Family\")) }},\n  \"facility_of_choice\": {{ JSON.stringify($fromAI(\"facility_of_choice\", \"Exact name of chosen accredited KADCHMA facility\")) }},\n  \"NIN\": {{ JSON.stringify($fromAI(\"NIN\", \"Enrollee's 11-digit NIN\")) }},\n  \"email\": {{ JSON.stringify($fromAI(\"email\", \"Email address, empty string if not provided\")) }},\n  \"payment_reference\": {{ JSON.stringify($fromAI(\"payment_reference\", \"Paystack payment reference code\")) }},\n  \"payment_status\": {{ JSON.stringify($fromAI(\"payment_status\", \"Payment status: Paid, Pending, or Failed\")) }},\n  \"status\": {{ JSON.stringify($fromAI(\"status\", \"Enrollment status: Enrolled, Pending Payment, or Pending Review\")) }},\n  \"enrolled_at\": {{ JSON.stringify($fromAI(\"enrolled_at\", \"Current datetime in ISO 8601 format\")) }},\n  \"next_of_kin_name\": {{ JSON.stringify($fromAI(\"next_of_kin_name\", \"Full name of the enrollee's next of kin\")) }},\n  \"next_of_kin_phone\": {{ JSON.stringify($fromAI(\"next_of_kin_phone\", \"Phone number of the next of kin\")) }},\n  \"next_of_kin_relationship\": {{ JSON.stringify($fromAI(\"next_of_kin_relationship\", \"Relationship of the next of kin to the enrollee\")) }}\n}",
+        "jsonBody": "={\n  \"first_name\": {{ JSON.stringify($fromAI(\"first_name\", \"Enrollee's first name\")) }},\n  \"last_name\": {{ JSON.stringify($fromAI(\"last_name\", \"Enrollee's last name\")) }},\n  \"other_name\": {{ JSON.stringify($fromAI(\"other_name\", \"Enrollee's middle/other name, empty string if not provided\")) }},\n  \"phone_number\": {{ JSON.stringify($fromAI(\"phone_number\", \"Enrollee phone number\")) }},\n  \"date_of_birth\": {{ JSON.stringify($fromAI(\"date_of_birth\", \"Date of birth in DD/MM/YYYY format\")) }},\n  \"gender\": {{ JSON.stringify($fromAI(\"gender\", \"Gender: Male or Female\")) }},\n  \"address\": {{ JSON.stringify($fromAI(\"address\", \"Residential address of the enrollee\")) }},\n  \"plan_type\": {{ JSON.stringify($fromAI(\"plan_type\", \"Plan type: Individual or Family\")) }},\n  \"facility_of_choice\": {{ JSON.stringify($fromAI(\"facility_of_choice\", \"Exact name of chosen accredited KADCHMA facility\")) }},\n  \"NIN\": {{ JSON.stringify($fromAI(\"NIN\", \"Enrollee's 11-digit NIN\")) }},\n  \"email\": {{ JSON.stringify($fromAI(\"email\", \"Email address, empty string if not provided\")) }},\n  \"payment_reference\": {{ JSON.stringify($fromAI(\"payment_reference\", \"Paystack payment reference code\")) }},\n  \"payment_status\": {{ JSON.stringify($fromAI(\"payment_status\", \"Payment status: Paid, Pending, or Failed\")) }},\n  \"status\": {{ JSON.stringify($fromAI(\"status\", \"Enrollment status: Enrolled, Pending Payment, or Pending Review\")) }},\n  \"enrolled_at\": {{ JSON.stringify($fromAI(\"enrolled_at\", \"Current datetime in ISO 8601 format\")) }},\n  \"next_of_kin_name\": {{ JSON.stringify($fromAI(\"next_of_kin_name\", \"Full name of the enrollee's next of kin\")) }},\n  \"next_of_kin_phone\": {{ JSON.stringify($fromAI(\"next_of_kin_phone\", \"Phone number of the next of kin\")) }},\n  \"next_of_kin_relationship\": {{ JSON.stringify($fromAI(\"next_of_kin_relationship\", \"Relationship of the next of kin to the enrollee\")) }},\n  \"contact_channel\": \"WhatsApp\",\n  \"contact_id\": {{ JSON.stringify($('Extract Message').item.json.from) }}\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
@@ -299,294 +299,34 @@
     },
     {
       "parameters": {
-        "operation": "update",
-        "documentId": {
-          "__rl": true,
-          "value": "1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY",
-          "mode": "list",
-          "cachedResultName": "Kaduna Health Insurance Enrollment",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "enrollments",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit#gid=0"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "enrollment_id": "={{ $json.enrollment_id }}",
-            "payment_status": "=Paid",
-            "status": "=Enrolled",
-            "payment_reference": "={{ $json.reference }}",
-            "payment_proof_note": "={{ $json.payment_note }}",
-            "row_number": 0
-          },
-          "matchingColumns": [
-            "enrollment_id"
-          ],
-          "schema": [
+        "method": "PATCH",
+        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/enrollments/{{ encodeURIComponent($json.enrollment_id) }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "id": "enrollment_id",
-              "displayName": "enrollment_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
-              "id": "first_name",
-              "displayName": "first_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "last_name",
-              "displayName": "last_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "other_name",
-              "displayName": "other_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "phone_number",
-              "displayName": "phone_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "date_of_birth",
-              "displayName": "date_of_birth",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "gender",
-              "displayName": "gender",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "address",
-              "displayName": "address",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "plan_type",
-              "displayName": "plan_type",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "facility_of_choice",
-              "displayName": "facility_of_choice",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "NIN",
-              "displayName": "NIN",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "email",
-              "displayName": "email",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "payment_reference",
-              "displayName": "payment_reference",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "payment_status",
-              "displayName": "payment_status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "payment_proof_note",
-              "displayName": "payment_proof_note",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "enrolled_at",
-              "displayName": "enrolled_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "contact_channel",
-              "displayName": "contact_channel",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "contact_id",
-              "displayName": "contact_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "row_number",
-              "displayName": "row_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "number",
-              "canBeUsedToMatch": true,
-              "readOnly": true,
-              "removed": false
+              "name": "Content-Type",
+              "value": "application/json"
             }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
+          ]
         },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"payment_status\": \"Paid\",\n  \"status\": \"Enrolled\",\n  \"payment_reference\": {{ JSON.stringify($json.reference) }},\n  \"payment_proof_note\": {{ JSON.stringify($json.payment_note) }}\n}",
         "options": {}
       },
       "id": "19422b8c-e0fe-42cb-b238-2ca1a4f483ca",
       "name": "Update Enrollment — Payment Received",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
       "position": [
         -752,
         736
-      ],
-      "alwaysOutputData": true,
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "TFJCw5pMkR9NynNc",
-          "name": "Google Sheets account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY",
-          "mode": "list",
-          "cachedResultName": "Kaduna Health Insurance Enrollment",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "enrollments",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit#gid=0"
-        },
-        "filtersUI": {
-          "values": [
-            {
-              "lookupColumn": "enrollment_id",
-              "lookupValue": "={{ $('Parse KADCHMA Paystack Event').first().json.enrollment_id }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "id": "8b2466b6-fbed-4900-947b-51085b00af1c",
-      "name": "Lookup Enrollment for Confirmation",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [
-        -528,
-        736
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "TFJCw5pMkR9NynNc",
-          "name": "Google Sheets account 2"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -845,7 +585,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"first_name\": {{ JSON.stringify($fromAI(\"first_name\", \"Enrollee's first name\")) }},\n  \"last_name\": {{ JSON.stringify($fromAI(\"last_name\", \"Enrollee's last name\")) }},\n  \"other_name\": {{ JSON.stringify($fromAI(\"other_name\", \"Enrollee's middle/other name, empty string if not provided\")) }},\n  \"phone_number\": {{ JSON.stringify($fromAI(\"phone_number\", \"Enrollee phone number\")) }},\n  \"date_of_birth\": {{ JSON.stringify($fromAI(\"date_of_birth\", \"Date of birth in DD/MM/YYYY format\")) }},\n  \"gender\": {{ JSON.stringify($fromAI(\"gender\", \"Gender: Male or Female\")) }},\n  \"address\": {{ JSON.stringify($fromAI(\"address\", \"Residential address of the enrollee\")) }},\n  \"plan_type\": {{ JSON.stringify($fromAI(\"plan_type\", \"Plan type: Individual or Family\")) }},\n  \"facility_of_choice\": {{ JSON.stringify($fromAI(\"facility_of_choice\", \"Exact name of chosen accredited KADCHMA facility\")) }},\n  \"NIN\": {{ JSON.stringify($fromAI(\"NIN\", \"Enrollee's 11-digit NIN\")) }},\n  \"email\": {{ JSON.stringify($fromAI(\"email\", \"Email address, empty string if not provided\")) }},\n  \"payment_reference\": {{ JSON.stringify($fromAI(\"payment_reference\", \"Paystack payment reference code\")) }},\n  \"payment_status\": {{ JSON.stringify($fromAI(\"payment_status\", \"Payment status: Paid, Pending, or Failed\")) }},\n  \"status\": {{ JSON.stringify($fromAI(\"status\", \"Enrollment status: Enrolled, Pending Payment, or Pending Review\")) }},\n  \"enrolled_at\": {{ JSON.stringify($fromAI(\"enrolled_at\", \"Current datetime in ISO 8601 format\")) }},\n  \"next_of_kin_name\": {{ JSON.stringify($fromAI(\"next_of_kin_name\", \"Full name of the enrollee's next of kin\")) }},\n  \"next_of_kin_phone\": {{ JSON.stringify($fromAI(\"next_of_kin_phone\", \"Phone number of the next of kin\")) }},\n  \"next_of_kin_relationship\": {{ JSON.stringify($fromAI(\"next_of_kin_relationship\", \"Relationship of the next of kin to the enrollee\")) }}\n}",
+        "jsonBody": "={\n  \"first_name\": {{ JSON.stringify($fromAI(\"first_name\", \"Enrollee's first name\")) }},\n  \"last_name\": {{ JSON.stringify($fromAI(\"last_name\", \"Enrollee's last name\")) }},\n  \"other_name\": {{ JSON.stringify($fromAI(\"other_name\", \"Enrollee's middle/other name, empty string if not provided\")) }},\n  \"phone_number\": {{ JSON.stringify($fromAI(\"phone_number\", \"Enrollee phone number\")) }},\n  \"date_of_birth\": {{ JSON.stringify($fromAI(\"date_of_birth\", \"Date of birth in DD/MM/YYYY format\")) }},\n  \"gender\": {{ JSON.stringify($fromAI(\"gender\", \"Gender: Male or Female\")) }},\n  \"address\": {{ JSON.stringify($fromAI(\"address\", \"Residential address of the enrollee\")) }},\n  \"plan_type\": {{ JSON.stringify($fromAI(\"plan_type\", \"Plan type: Individual or Family\")) }},\n  \"facility_of_choice\": {{ JSON.stringify($fromAI(\"facility_of_choice\", \"Exact name of chosen accredited KADCHMA facility\")) }},\n  \"NIN\": {{ JSON.stringify($fromAI(\"NIN\", \"Enrollee's 11-digit NIN\")) }},\n  \"email\": {{ JSON.stringify($fromAI(\"email\", \"Email address, empty string if not provided\")) }},\n  \"payment_reference\": {{ JSON.stringify($fromAI(\"payment_reference\", \"Paystack payment reference code\")) }},\n  \"payment_status\": {{ JSON.stringify($fromAI(\"payment_status\", \"Payment status: Paid, Pending, or Failed\")) }},\n  \"status\": {{ JSON.stringify($fromAI(\"status\", \"Enrollment status: Enrolled, Pending Payment, or Pending Review\")) }},\n  \"enrolled_at\": {{ JSON.stringify($fromAI(\"enrolled_at\", \"Current datetime in ISO 8601 format\")) }},\n  \"next_of_kin_name\": {{ JSON.stringify($fromAI(\"next_of_kin_name\", \"Full name of the enrollee's next of kin\")) }},\n  \"next_of_kin_phone\": {{ JSON.stringify($fromAI(\"next_of_kin_phone\", \"Phone number of the next of kin\")) }},\n  \"next_of_kin_relationship\": {{ JSON.stringify($fromAI(\"next_of_kin_relationship\", \"Relationship of the next of kin to the enrollee\")) }},\n  \"contact_channel\": \"Instagram\",\n  \"contact_id\": {{ JSON.stringify($('Webhook').item.json.body.entry[0].messaging[0].sender.id) }}\n}",
         "options": {}
       },
       "type": "n8n-nodes-base.httpRequestTool",
@@ -1056,275 +796,67 @@
     },
     {
       "parameters": {
-        "descriptionType": "manual",
-        "toolDescription": "Use this tool to submit a complaint or report an issue raised by a user (e.g. payment not reflecting, facility refusing service, card not received, poor service quality, or any other complaint). Call this whenever a user says they want to report a problem, file a complaint, or raise an issue.\n\nYou must pass ALL of the following fields:\n- complaint_id: generate in format CMP-YYYYMMDD-XXXX (random 4-digit suffix)\n- enrollment_id: the user's enrollment ID if known, otherwise empty string\n- full_name: the complainant's full name\n- phone_number: the complainant's phone number\n- channel: 'WhatsApp'\n- complaint_category: one of 'Payment Issue', 'Facility Issue', 'Service Quality', 'ID Card Not Received', 'Staff Conduct', or 'Other'\n- complaint_details: a clear, full description of the issue in the user's own words\n- status: always 'Open' when first submitted\n- submitted_at: current datetime in ISO 8601 format e.g. 2026-06-19T14:30:00\n\nAfter saving, confirm to the user with their complaint_id and let them know the KADCHMA support team will follow up. Do not promise a specific resolution timeframe beyond 'as soon as possible'.",
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY",
-          "mode": "list",
-          "cachedResultName": "Kaduna Health Insurance Enrollment",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": 1150620226,
-          "mode": "list",
-          "cachedResultName": "Complains",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit#gid=1150620226"
-        },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "complaint_id": "={{ $fromAI(\"complaint_id\", \"Unique complaint ID in format CMP-YYYYMMDD-XXXX\") }}",
-            "enrollment_id": "={{ $fromAI(\"enrollment_id\", \"Enrollee's enrollment ID if known, empty string if unknown\") }}",
-            "full_name": "={{ $fromAI(\"full_name\", \"Full name of the person submitting the complaint\") }}",
-            "phone_number": "={{ $fromAI(\"phone_number\", \"Phone number of the complainant\") }}",
-            "channel": "={{ $fromAI(\"channel\", \"Channel the complaint was submitted from: WhatsApp or Instagram\") }}",
-            "complaint_category": "={{ $fromAI(\"complaint_category\", \"Category: Payment Issue, Facility Issue, Service Quality, ID Card Not Received, Staff Conduct, or Other\") }}",
-            "complaint_details": "={{ $fromAI(\"complaint_details\", \"Full description of the complaint in the user's own words\") }}",
-            "status": "={{ $fromAI(\"status\", \"Always 'Open' when first submitted\") }}",
-            "submitted_at": "={{ $fromAI(\"submitted_at\", \"Current datetime in ISO 8601 format\") }}"
-          },
-          "matchingColumns": [],
-          "schema": [
+        "toolDescription": "Use this tool to submit a complaint or report an issue raised by a user (e.g. payment not reflecting, facility refusing service, card not received, poor service quality, or any other complaint) to the KADCHMA admin dashboard. Call this whenever a user says they want to report a problem, file a complaint, or raise an issue.\n\nYou must pass:\n- enrollment_id: the user's enrollment ID if known, otherwise empty string\n- full_name: the complainant's full name\n- phone_number: the complainant's phone number\n- complaint_category: one of 'Payment Issue', 'Facility Issue', 'Service Quality', 'ID Card Not Received', 'Staff Conduct', or 'Other'\n- complaint_details: a clear, full description of the issue in the user's own words\n\nYou do not need to generate complaint_id — the server assigns it and returns it in the response; quote that value back to the user as their Complaint ID.\n\nAfter saving, confirm to the user with their complaint_id and let them know the KADCHMA support team will follow up. Do not promise a specific resolution timeframe beyond 'as soon as possible'.",
+        "method": "POST",
+        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/complaints",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "id": "complaint_id",
-              "displayName": "complaint_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
-              "id": "enrollment_id",
-              "displayName": "enrollment_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "full_name",
-              "displayName": "full_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "phone_number",
-              "displayName": "phone_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "channel",
-              "displayName": "channel",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "complaint_category",
-              "displayName": "complaint_category",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "complaint_details",
-              "displayName": "complaint_details",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "submitted_at",
-              "displayName": "submitted_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
+              "name": "Content-Type",
+              "value": "application/json"
             }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
+          ]
         },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"channel\": \"WhatsApp\",\n  \"enrollment_id\": {{ JSON.stringify($fromAI(\"enrollment_id\", \"Enrollee's enrollment ID if known, empty string if unknown\")) }},\n  \"full_name\": {{ JSON.stringify($fromAI(\"full_name\", \"Full name of the person submitting the complaint\")) }},\n  \"phone_number\": {{ JSON.stringify($fromAI(\"phone_number\", \"Phone number of the complainant\")) }},\n  \"complaint_category\": {{ JSON.stringify($fromAI(\"complaint_category\", \"Category: Payment Issue, Facility Issue, Service Quality, ID Card Not Received, Staff Conduct, or Other\")) }},\n  \"complaint_details\": {{ JSON.stringify($fromAI(\"complaint_details\", \"Full description of the complaint in the user's own words\")) }}\n}",
         "options": {}
       },
       "id": "75bf2ecf-266b-43d7-8962-02a2bb0fb199",
       "name": "submit_complaint",
-      "type": "n8n-nodes-base.googleSheetsTool",
-      "typeVersion": 4.7,
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
       "position": [
         496,
         400
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "TFJCw5pMkR9NynNc",
-          "name": "Google Sheets account 2"
-        }
-      }
+      ]
     },
     {
       "parameters": {
-        "descriptionType": "manual",
-        "toolDescription": "Use this tool to submit a complaint or report an issue raised by a user (e.g. payment not reflecting, facility refusing service, card not received, poor service quality, or any other complaint). Call this whenever a user says they want to report a problem, file a complaint, or raise an issue.\n\nYou must pass ALL of the following fields:\n- complaint_id: generate in format CMP-YYYYMMDD-XXXX (random 4-digit suffix)\n- enrollment_id: the user's enrollment ID if known, otherwise empty string\n- full_name: the complainant's full name\n- phone_number: the complainant's phone number\n- channel: 'Instagram'\n- complaint_category: one of 'Payment Issue', 'Facility Issue', 'Service Quality', 'ID Card Not Received', 'Staff Conduct', or 'Other'\n- complaint_details: a clear, full description of the issue in the user's own words\n- status: always 'Open' when first submitted\n- submitted_at: current datetime in ISO 8601 format e.g. 2026-06-19T14:30:00\n\nAfter saving, confirm to the user with their complaint_id and let them know the KADCHMA support team will follow up. Do not promise a specific resolution timeframe beyond 'as soon as possible'.",
-        "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY",
-          "mode": "list",
-          "cachedResultName": "Kaduna Health Insurance Enrollment",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit?usp=drivesdk"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "Complains",
-          "mode": "list",
-          "cachedResultName": "Complains",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ojb3cj7zUqVgupjEF_7KxhpUl3i9ivSktYN0f6A1ODY/edit?usp=drivesdk"
-        },
-        "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {
-            "complaint_id": "={{ $fromAI(\"complaint_id\", \"Unique complaint ID in format CMP-YYYYMMDD-XXXX\") }}",
-            "enrollment_id": "={{ $fromAI(\"enrollment_id\", \"Enrollee's enrollment ID if known, empty string if unknown\") }}",
-            "full_name": "={{ $fromAI(\"full_name\", \"Full name of the person submitting the complaint\") }}",
-            "phone_number": "={{ $fromAI(\"phone_number\", \"Phone number of the complainant\") }}",
-            "channel": "={{ $fromAI(\"channel\", \"Channel the complaint was submitted from: WhatsApp or Instagram\") }}",
-            "complaint_category": "={{ $fromAI(\"complaint_category\", \"Category: Payment Issue, Facility Issue, Service Quality, ID Card Not Received, Staff Conduct, or Other\") }}",
-            "complaint_details": "={{ $fromAI(\"complaint_details\", \"Full description of the complaint in the user's own words\") }}",
-            "status": "={{ $fromAI(\"status\", \"Always 'Open' when first submitted\") }}",
-            "submitted_at": "={{ $fromAI(\"submitted_at\", \"Current datetime in ISO 8601 format\") }}"
-          },
-          "matchingColumns": [],
-          "schema": [
+        "toolDescription": "Use this tool to submit a complaint or report an issue raised by a user (e.g. payment not reflecting, facility refusing service, card not received, poor service quality, or any other complaint) to the KADCHMA admin dashboard. Call this whenever a user says they want to report a problem, file a complaint, or raise an issue.\n\nYou must pass:\n- enrollment_id: the user's enrollment ID if known, otherwise empty string\n- full_name: the complainant's full name\n- phone_number: the complainant's phone number\n- complaint_category: one of 'Payment Issue', 'Facility Issue', 'Service Quality', 'ID Card Not Received', 'Staff Conduct', or 'Other'\n- complaint_details: a clear, full description of the issue in the user's own words\n\nYou do not need to generate complaint_id — the server assigns it and returns it in the response; quote that value back to the user as their Complaint ID.\n\nAfter saving, confirm to the user with their complaint_id and let them know the KADCHMA support team will follow up. Do not promise a specific resolution timeframe beyond 'as soon as possible'.",
+        "method": "POST",
+        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/complaints",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "id": "complaint_id",
-              "displayName": "complaint_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
-              "id": "enrollment_id",
-              "displayName": "enrollment_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "full_name",
-              "displayName": "full_name",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "phone_number",
-              "displayName": "phone_number",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "channel",
-              "displayName": "channel",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "complaint_category",
-              "displayName": "complaint_category",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "complaint_details",
-              "displayName": "complaint_details",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "submitted_at",
-              "displayName": "submitted_at",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
+              "name": "Content-Type",
+              "value": "application/json"
             }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": true
+          ]
         },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"channel\": \"Instagram\",\n  \"enrollment_id\": {{ JSON.stringify($fromAI(\"enrollment_id\", \"Enrollee's enrollment ID if known, empty string if unknown\")) }},\n  \"full_name\": {{ JSON.stringify($fromAI(\"full_name\", \"Full name of the person submitting the complaint\")) }},\n  \"phone_number\": {{ JSON.stringify($fromAI(\"phone_number\", \"Phone number of the complainant\")) }},\n  \"complaint_category\": {{ JSON.stringify($fromAI(\"complaint_category\", \"Category: Payment Issue, Facility Issue, Service Quality, ID Card Not Received, Staff Conduct, or Other\")) }},\n  \"complaint_details\": {{ JSON.stringify($fromAI(\"complaint_details\", \"Full description of the complaint in the user's own words\")) }}\n}",
         "options": {}
       },
       "id": "af4c2c0f-b97b-4ca6-a766-48a510e6a7ca",
       "name": "submit_complaint1",
-      "type": "n8n-nodes-base.googleSheetsTool",
-      "typeVersion": 4.7,
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
       "position": [
         240,
         1376
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "TFJCw5pMkR9NynNc",
-          "name": "Google Sheets account 2"
-        }
-      }
+      ]
     },
     {
       "parameters": {
@@ -2128,17 +1660,6 @@
       ]
     },
     "Update Enrollment — Payment Received": {
-      "main": [
-        [
-          {
-            "node": "Lookup Enrollment for Confirmation",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Lookup Enrollment for Confirmation": {
       "main": [
         [
           {

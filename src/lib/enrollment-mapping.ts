@@ -38,7 +38,7 @@ export function toEnrollmentRecord(doc: StoredEnrollment): EnrollmentRecord {
     facility: doc.facility_of_choice || "",
     hasPicture: false,
     status: STATUS_FROM_STORE[doc.status] ?? "Pending",
-    channel: "WhatsApp",
+    channel: doc.contact_channel || "WhatsApp",
     note: doc.payment_status
       ? `Payment ${doc.payment_status.toLowerCase()}${doc.payment_proof_note ? " — " + doc.payment_proof_note : ""}`
       : "",
