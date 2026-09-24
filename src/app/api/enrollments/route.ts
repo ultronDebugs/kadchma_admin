@@ -45,7 +45,6 @@ const REQUIRED_FIELDS = [
   "address",
   "plan_type",
   "facility_of_choice",
-  "NIN",
   "enrolled_at",
   "status",
   "next_of_kin_name",

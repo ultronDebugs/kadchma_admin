@@ -128,7 +128,7 @@ export function RecordDrawer() {
                 <Field label="Firstname" value={rec.first} />
                 <Field label="Surname" value={rec.last} />
                 <Field label="Other names" value={na(rec.other)} />
-                <Field label="NIN" value={rec.nin} />
+                <Field label="NIN" value={na(rec.nin)} />
                 <Field label="Date of birth" value={fmt(rec.dob)} />
                 <Field label="Gender" value={rec.gender} />
                 <Field label="Marital status" value={rec.marital} />
