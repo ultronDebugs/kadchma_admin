@@ -54,13 +54,14 @@ export function RecordsTable() {
   const perPage = useAppStore((s) => s.perPage);
   const setPageNo = useAppStore((s) => s.setPageNo);
   const setPerPage = useAppStore((s) => s.setPerPage);
-  const dataState = useAppStore((s) => s.dataState);
+  const recordsStatus = useAppStore((s) => s.recordsStatus);
+  const hydrateRecords = useAppStore((s) => s.hydrateRecords);
   const openRecord = useAppStore((s) => s.openRecord);
   const resetFilters = useAppStore((s) => s.resetFilters);
 
-  const loading = dataState === "loading";
-  const error = dataState === "error";
-  const empty = dataState === "empty";
+  const loading = recordsStatus === "loading" || recordsStatus === "idle";
+  const error = recordsStatus === "error";
+  const empty = recordsStatus === "empty";
 
   const all = useMemo(() => {
     if (empty || loading || error) return [];
@@ -126,7 +127,7 @@ export function RecordsTable() {
               The enrollment service did not respond. Your filters have been kept — retry the request or contact the KADCHMA ICT desk.
             </p>
           </div>
-          <Button onClick={() => useAppStore.getState().setDataState("ready")}>Retry</Button>
+          <Button onClick={hydrateRecords}>Retry</Button>
         </div>
       )}
 

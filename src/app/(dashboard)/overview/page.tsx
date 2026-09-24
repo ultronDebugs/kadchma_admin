@@ -14,7 +14,6 @@ export default function OverviewPage() {
             most recent administrative activity.
           </p>
         </div>
-        <div className="text-[12px] text-muted-foreground">Records fetched from KADCHMA enrollment database · synced 05 Sep 2026, 09:12</div>
       </header>
 
       <SummaryCards />

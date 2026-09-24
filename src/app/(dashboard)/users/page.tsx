@@ -1,6 +1,10 @@
 import { UsersTable } from "@/components/users/users-table";
+import { getSessionUser } from "@/lib/session";
 
-export default function UsersPage() {
+export default async function UsersPage() {
+  const session = await getSessionUser();
+  const canManage = session?.role === "System Administrator";
+
   return (
     <>
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -11,10 +15,9 @@ export default function UsersPage() {
             state.
           </p>
         </div>
-        <div className="text-[12px] text-muted-foreground">Records fetched from KADCHMA enrollment database · synced 05 Sep 2026, 09:12</div>
       </header>
 
-      <UsersTable />
+      <UsersTable canManage={canManage} />
     </>
   );
 }

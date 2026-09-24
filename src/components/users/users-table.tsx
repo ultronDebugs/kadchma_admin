@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { InitialsAvatar, StatusBadge } from "@/components/status-badge";
 import { useAppStore } from "@/lib/store";
 
-export function UsersTable() {
+export function UsersTable({ canManage }: { canManage: boolean }) {
   const users = useAppStore((s) => s.users);
-  const dataState = useAppStore((s) => s.dataState);
-  const setDataState = useAppStore((s) => s.setDataState);
+  const usersStatus = useAppStore((s) => s.usersStatus);
+  const hydrateUsers = useAppStore((s) => s.hydrateUsers);
   const openInvite = useAppStore((s) => s.openInvite);
   const openEditRole = useAppStore((s) => s.openEditRole);
   const openDeactivate = useAppStore((s) => s.openDeactivate);
 
-  const loading = dataState === "loading";
-  const error = dataState === "error";
-  const empty = dataState === "empty" || (!loading && !error && users.length === 0);
+  const loading = usersStatus === "loading" || usersStatus === "idle";
+  const error = usersStatus === "error";
+  const empty = usersStatus === "empty";
 
   return (
     <>
@@ -23,10 +23,12 @@ export function UsersTable() {
         <div className="text-[12.5px] text-muted-foreground">
           {users.length} staff accounts · {users.filter((u) => u.account === "Active").length} active
         </div>
-        <Button className="ml-auto" onClick={openInvite}>
-          <UserPlus size={15} />
-          <span>Register user</span>
-        </Button>
+        {canManage && (
+          <Button className="ml-auto" onClick={openInvite}>
+            <UserPlus size={15} />
+            <span>Register user</span>
+          </Button>
+        )}
       </div>
 
       <section className="elev-sm overflow-hidden rounded-md bg-card">
@@ -40,7 +42,7 @@ export function UsersTable() {
           <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
             <WarningOctagon size={30} style={{ color: "var(--st-expired-fg)" }} />
             <p className="text-[13px] text-muted-foreground">The directory service did not respond.</p>
-            <Button onClick={() => setDataState("ready")}>Retry</Button>
+            <Button onClick={hydrateUsers}>Retry</Button>
           </div>
         )}
 
@@ -62,7 +64,7 @@ export function UsersTable() {
                   <th className="py-2 text-left font-medium">Facility / LGA</th>
                   <th className="py-2 text-left font-medium">Last active</th>
                   <th className="py-2 text-left font-medium">Account</th>
-                  <th className="py-2 pr-4 text-right font-medium">Actions</th>
+                  {canManage && <th className="py-2 pr-4 text-right font-medium">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -83,19 +85,21 @@ export function UsersTable() {
                     <td className="py-3 pr-2">{u.scope}</td>
                     <td className="py-3 pr-2 whitespace-nowrap text-muted-foreground">{u.lastActive}</td>
                     <td className="py-3 pr-2"><StatusBadge status={u.account} /></td>
-                    <td className="py-3 pr-4">
-                      <div className="flex justify-end gap-1.5">
-                        <Button variant="outline" size="sm" onClick={() => openEditRole(u.name)}>Edit role</Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-[var(--st-expired-fg)]"
-                          onClick={() => openDeactivate(u.name, u.account === "Suspended")}
-                        >
-                          {u.account === "Suspended" ? "Reactivate" : "Deactivate"}
-                        </Button>
-                      </div>
-                    </td>
+                    {canManage && (
+                      <td className="py-3 pr-4">
+                        <div className="flex justify-end gap-1.5">
+                          <Button variant="outline" size="sm" onClick={() => openEditRole(u.email, u.name, u.role)}>Edit role</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[var(--st-expired-fg)]"
+                            onClick={() => openDeactivate(u.email, u.name, u.account === "Suspended")}
+                          >
+                            {u.account === "Suspended" ? "Reactivate" : "Deactivate"}
+                          </Button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

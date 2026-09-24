@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { findByEnrollmentId, updateEnrollmentByEnrollmentId } from "@/lib/enrollment-repo";
+import { normalizeIncomingStatus } from "@/lib/enrollment-mapping";
 import { isMongoConfigured } from "@/lib/mongodb";
 
 export const runtime = "nodejs";
@@ -44,6 +45,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   for (const field of PATCHABLE_FIELDS) {
     if (typeof body[field] === "string") patch[field] = body[field];
   }
+  if (patch.status) patch.status = normalizeIncomingStatus(patch.status);
   if (Object.keys(patch).length === 0) {
     return NextResponse.json({ error: `No patchable fields provided (expected one of: ${PATCHABLE_FIELDS.join(", ")})` }, { status: 400 });
   }

@@ -1,12 +1,5 @@
 export type Status = "Active" | "Pending" | "Expired" | "Suspended" | "Inactive";
 
-export type StatusChange = {
-  from: Status;
-  to: Status;
-  admin: string;
-  at: Date;
-};
-
 export type EnrollmentRecord = {
   id: string;
   first: string;
@@ -25,7 +18,6 @@ export type EnrollmentRecord = {
   channel: string;
   note: string;
   expiry: Date;
-  history: StatusChange[];
 };
 
 export type AuditAction = "Status change" | "Record viewed" | "Export generated";
@@ -35,11 +27,12 @@ export type AuditEntry = {
   admin: string;
   action: AuditAction;
   enrollee: string;
+  enrollmentId: string;
   from: Status | null;
   to: Status | null;
 };
 
-export type AccountState = "Active" | "Suspended" | "Invited";
+export type AccountState = "Active" | "Suspended";
 
 export type StaffUser = {
   name: string;
@@ -49,6 +42,8 @@ export type StaffUser = {
   lastActive: string;
   account: AccountState;
 };
+
+export type SessionUser = { email: string; name: string; role: string };
 
 export type Filters = {
   name: string;
@@ -81,8 +76,8 @@ export type PendingConfirm = {
 
 export type UserDialogState =
   | { kind: "invite" }
-  | { kind: "role"; name: string }
-  | { kind: "deactivate"; name: string; reactivate: boolean };
+  | { kind: "role"; email: string; name: string; role: string }
+  | { kind: "deactivate"; email: string; name: string; reactivate: boolean };
 
 export type Toast = {
   id: string;

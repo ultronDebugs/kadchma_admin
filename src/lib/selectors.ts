@@ -42,3 +42,9 @@ export function filterAudit(audit: AuditEntry[], f: AuditFilters) {
     return true;
   });
 }
+
+export function historyForEnrollment(audit: AuditEntry[], enrollmentId: string) {
+  return audit
+    .filter((a) => a.enrollmentId === enrollmentId && a.action === "Status change")
+    .sort((a, b) => b.at.getTime() - a.at.getTime());
+}

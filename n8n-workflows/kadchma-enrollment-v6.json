@@ -193,7 +193,16 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,
@@ -554,7 +563,16 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.4,

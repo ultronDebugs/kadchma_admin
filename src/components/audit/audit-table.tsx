@@ -11,11 +11,11 @@ import { fmtDT } from "@/lib/mock-data";
 export function AuditTable() {
   const audit = useAppStore((s) => s.audit);
   const auditFilters = useAppStore((s) => s.auditFilters);
-  const dataState = useAppStore((s) => s.dataState);
-  const setDataState = useAppStore((s) => s.setDataState);
+  const auditStatus = useAppStore((s) => s.auditStatus);
+  const hydrateAudit = useAppStore((s) => s.hydrateAudit);
 
-  const loading = dataState === "loading";
-  const error = dataState === "error";
+  const loading = auditStatus === "loading" || auditStatus === "idle";
+  const error = auditStatus === "error";
 
   const rows = useMemo(() => (loading || error ? [] : filterAudit(audit, auditFilters)), [audit, auditFilters, loading, error]);
 
@@ -36,7 +36,7 @@ export function AuditTable() {
         <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
           <WarningOctagon size={30} style={{ color: "var(--st-expired-fg)" }} />
           <p className="text-[13px] text-muted-foreground">The audit service did not respond.</p>
-          <Button onClick={() => setDataState("ready")}>Retry</Button>
+          <Button onClick={hydrateAudit}>Retry</Button>
         </div>
       )}
 

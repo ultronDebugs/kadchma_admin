@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { StatusBadge, InitialsAvatar } from "@/components/status-badge";
 import { useAppStore } from "@/lib/store";
 import { STATUSES, daysTo, fmt, fmtDT, na } from "@/lib/mock-data";
+import { historyForEnrollment } from "@/lib/selectors";
 import type { Status } from "@/lib/types";
 
 function Field({ label, value, span }: { label: string; value: string; span?: boolean }) {
@@ -24,6 +25,7 @@ export function RecordDrawer() {
   const draftStatus = useAppStore((s) => s.draftStatus);
   const saving = useAppStore((s) => s.saving);
   const records = useAppStore((s) => s.records);
+  const audit = useAppStore((s) => s.audit);
   const closeDrawer = useAppStore((s) => s.closeDrawer);
   const retryDrawer = useAppStore((s) => s.retryDrawer);
   const pickStatus = useAppStore((s) => s.pickStatus);
@@ -31,6 +33,7 @@ export function RecordDrawer() {
 
   const rec = records.find((r) => r.id === selectedId);
   const open = !!selectedId;
+  const history = rec ? historyForEnrollment(audit, rec.id) : [];
 
   const days = rec ? daysTo(rec.expiry) : 0;
   const expired = days < 0;
@@ -172,18 +175,18 @@ export function RecordDrawer() {
 
             <section>
               <h3 className="mb-3 text-[11px] font-medium tracking-wide text-primary uppercase">Status change history</h3>
-              {rec.history.length === 0 ? (
+              {history.length === 0 ? (
                 <p className="text-[13px] text-muted-foreground">No status changes recorded for this enrollment.</p>
               ) : (
                 <div className="flex flex-col">
-                  {rec.history.map((h, i) => (
+                  {history.map((h, i) => (
                     <div key={i} className="flex gap-3 border-b py-3 last:border-b-0">
                       <ClockCounterClockwise size={15} className="mt-1 flex-none text-muted-foreground" />
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <StatusBadge status={h.from} />
+                          {h.from ? <StatusBadge status={h.from} /> : <span>—</span>}
                           <span className="text-muted-foreground">→</span>
-                          <StatusBadge status={h.to} />
+                          {h.to ? <StatusBadge status={h.to} /> : <span>—</span>}
                         </div>
                         <div className="mt-1 text-[12px] text-muted-foreground">
                           {h.admin} · {fmtDT(h.at)}

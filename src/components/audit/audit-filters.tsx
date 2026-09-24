@@ -1,25 +1,31 @@
 "use client";
 
+import { useMemo } from "react";
 import { ArrowCounterClockwise } from "@phosphor-icons/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAppStore, ADMINS } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 import { ACTIONS } from "@/lib/mock-data";
 
 const ALL = "__all__";
-
-const adminItems: Record<string, React.ReactNode> = { [ALL]: "All administrators" };
-for (const a of ADMINS) adminItems[a] = a;
 
 const actionItems: Record<string, React.ReactNode> = { [ALL]: "All actions" };
 for (const a of ACTIONS) actionItems[a] = a;
 
 export function AuditFiltersPanel() {
+  const audit = useAppStore((s) => s.audit);
   const auditFilters = useAppStore((s) => s.auditFilters);
   const setAuditFilter = useAppStore((s) => s.setAuditFilter);
   const resetAuditFilters = useAppStore((s) => s.resetAuditFilters);
+
+  const admins = useMemo(() => Array.from(new Set(audit.map((a) => a.admin))).sort(), [audit]);
+  const adminItems = useMemo(() => {
+    const items: Record<string, React.ReactNode> = { [ALL]: "All administrators" };
+    for (const a of admins) items[a] = a;
+    return items;
+  }, [admins]);
 
   return (
     <section
@@ -39,7 +45,7 @@ export function AuditFiltersPanel() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>All administrators</SelectItem>
-            {ADMINS.map((a) => (
+            {admins.map((a) => (
               <SelectItem key={a} value={a}>{a}</SelectItem>
             ))}
           </SelectContent>

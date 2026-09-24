@@ -3,13 +3,17 @@
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store";
 
-/** Swaps in real enrollments from /api/enrollments when Google Sheets credentials are configured; silently keeps demo data otherwise. */
+/** Loads enrollments, audit log, and staff accounts once the dashboard mounts. */
 export function LiveDataHydrator() {
-  const hydrateFromLive = useAppStore((s) => s.hydrateFromLive);
+  const hydrateRecords = useAppStore((s) => s.hydrateRecords);
+  const hydrateAudit = useAppStore((s) => s.hydrateAudit);
+  const hydrateUsers = useAppStore((s) => s.hydrateUsers);
 
   useEffect(() => {
-    hydrateFromLive();
-  }, [hydrateFromLive]);
+    hydrateRecords();
+    hydrateAudit();
+    hydrateUsers();
+  }, [hydrateRecords, hydrateAudit, hydrateUsers]);
 
   return null;
 }

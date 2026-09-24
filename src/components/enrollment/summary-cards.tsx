@@ -5,9 +5,9 @@ import { useAppStore } from "@/lib/store";
 
 export function SummaryCards() {
   const records = useAppStore((s) => s.records);
-  const dataState = useAppStore((s) => s.dataState);
-  const loading = dataState === "loading";
-  const empty = dataState === "empty";
+  const recordsStatus = useAppStore((s) => s.recordsStatus);
+  const loading = recordsStatus === "loading" || recordsStatus === "idle";
+  const empty = recordsStatus === "empty";
 
   const counts = (status: string) => (empty ? 0 : records.filter((r) => r.status === status).length);
 

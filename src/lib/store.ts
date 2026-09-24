@@ -1,14 +1,15 @@
 "use client";
 
 import { create } from "zustand";
-import { ADMINS, fmt, seedDatabase } from "@/lib/mock-data";
+import { toEnrollmentRecord } from "@/lib/enrollment-mapping";
 import type {
+  AuditEntry,
   AuditFilters,
-  DataState,
   DrawerState,
   EnrollmentRecord,
   Filters,
   PendingConfirm,
+  StaffUser,
   Status,
   Toast,
   UserDialogState,
@@ -27,20 +28,40 @@ const EMPTY_FILTERS: Filters = {
 
 const EMPTY_AUDIT_FILTERS: AuditFilters = { admin: "", action: "", from: "", to: "" };
 
-const seed = seedDatabase();
+type FetchStatus = "idle" | "loading" | "ready" | "empty" | "error";
+
+async function getJson(url: string) {
+  const res = await fetch(url);
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || `Request to ${url} failed`);
+  return json;
+}
+
+async function sendJson(url: string, method: string, body: unknown) {
+  const res = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || `Request to ${url} failed`);
+  return json;
+}
 
 type AppState = {
   records: EnrollmentRecord[];
-  audit: ReturnType<typeof seedDatabase>["audit"];
-  users: ReturnType<typeof seedDatabase>["users"];
+  recordsStatus: FetchStatus;
+  hydrateRecords: () => Promise<void>;
+
+  audit: AuditEntry[];
+  auditStatus: FetchStatus;
+  hydrateAudit: () => Promise<void>;
+
+  users: StaffUser[];
+  usersStatus: FetchStatus;
+  hydrateUsers: () => Promise<void>;
 
   expiryWarningDays: number;
-
-  // dev-panel simulated data states
-  dataState: DataState;
-  failNext: boolean;
-  setDataState: (s: DataState) => void;
-  toggleFailNext: () => void;
 
   filters: Filters;
   setFilter: <K extends keyof Filters>(key: K, value: Filters[K]) => void;
@@ -73,11 +94,14 @@ type AppState = {
   resetAuditFilters: () => void;
 
   userDialog: UserDialogState | null;
+  userDialogSubmitting: boolean;
   openInvite: () => void;
-  openEditRole: (name: string) => void;
-  openDeactivate: (name: string, reactivate: boolean) => void;
+  openEditRole: (email: string, name: string, role: string) => void;
+  openDeactivate: (email: string, name: string, reactivate: boolean) => void;
   closeUserDialog: () => void;
-  confirmUserDialog: () => void;
+  registerUser: (payload: { name: string; email: string; password: string; role: string; scope: string }) => Promise<boolean>;
+  changeUserRole: (email: string, role: string) => Promise<boolean>;
+  setUserAccount: (email: string, account: "Active" | "Suspended") => Promise<boolean>;
 
   toasts: Toast[];
   pushToast: (t: Omit<Toast, "id">) => void;
@@ -85,42 +109,61 @@ type AppState = {
   retryToast: (id: string, payload: PendingConfirm) => void;
 
   exportCsv: (rows: EnrollmentRecord[]) => void;
-
-  hydrateFromLive: () => Promise<void>;
 };
-
-function reviveRecordDates(r: EnrollmentRecord): EnrollmentRecord {
-  return {
-    ...r,
-    dob: new Date(r.dob),
-    expiry: new Date(r.expiry),
-    history: r.history.map((h) => ({ ...h, at: new Date(h.at) })),
-  };
-}
-
-function updateEnrollmentStatus(failNext: boolean): Promise<void> {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (failNext) reject(new Error("Gateway timeout while contacting the enrollment service"));
-      else resolve();
-    }, 1100);
-  });
-}
 
 let toastSeq = 0;
 
 export const useAppStore = create<AppState>((set, get) => ({
-  records: seed.records,
-  audit: seed.audit,
-  users: seed.users,
+  records: [],
+  recordsStatus: "idle",
+  hydrateRecords: async () => {
+    set({ recordsStatus: "loading" });
+    try {
+      const json = await getJson("/api/enrollments");
+      const records: EnrollmentRecord[] = (json.records ?? []).map(
+        (r: EnrollmentRecord) => ({ ...r, dob: new Date(r.dob), expiry: new Date(r.expiry) }),
+      );
+      set({ records, recordsStatus: records.length === 0 ? "empty" : "ready" });
+    } catch {
+      set({ recordsStatus: "error" });
+    }
+  },
+
+  audit: [],
+  auditStatus: "idle",
+  hydrateAudit: async () => {
+    set({ auditStatus: "loading" });
+    try {
+      const json = await getJson("/api/audit");
+      const audit: AuditEntry[] = (json.entries ?? []).map((a: AuditEntry) => ({ ...a, at: new Date(a.at) }));
+      set({ audit, auditStatus: audit.length === 0 ? "empty" : "ready" });
+    } catch {
+      set({ auditStatus: "error" });
+    }
+  },
+
+  users: [],
+  usersStatus: "idle",
+  hydrateUsers: async () => {
+    set({ usersStatus: "loading" });
+    try {
+      const json = await getJson("/api/users");
+      type ApiUser = { name: string; email: string; role: string; scope: string; account: "Active" | "Suspended"; lastActiveAt: string | null };
+      const users: StaffUser[] = (json.users ?? []).map((u: ApiUser) => ({
+        name: u.name,
+        email: u.email,
+        role: u.role,
+        scope: u.scope,
+        account: u.account,
+        lastActive: u.lastActiveAt ? new Date(u.lastActiveAt).toLocaleString("en-GB") : "Never signed in",
+      }));
+      set({ users, usersStatus: users.length === 0 ? "empty" : "ready" });
+    } catch {
+      set({ usersStatus: "error" });
+    }
+  },
 
   expiryWarningDays: 60,
-
-  dataState: "ready",
-  failNext: false,
-  setDataState: (s) =>
-    set({ dataState: s, pageNo: 1, selectedId: null, drawerState: s === "error" ? "error" : "idle" }),
-  toggleFailNext: () => set((st) => ({ failNext: !st.failNext })),
 
   filters: EMPTY_FILTERS,
   setFilter: (key, value) =>
@@ -145,21 +188,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   drawerState: "idle",
   draftStatus: null,
   openRecord: (id) => {
-    set({ selectedId: id, drawerState: "loading", draftStatus: null });
-    setTimeout(() => {
-      const st = get();
-      if (st.selectedId !== id) return;
-      const rec = st.records.find((r) => r.id === id);
-      set({
-        drawerState: st.dataState === "error" ? "error" : "ready",
-        draftStatus: rec ? rec.status : null,
-      });
-    }, 520);
+    const rec = get().records.find((r) => r.id === id);
+    set({ selectedId: id, drawerState: rec ? "ready" : "error", draftStatus: rec ? rec.status : null });
   },
   closeDrawer: () => set({ selectedId: null, draftStatus: null, confirm: null }),
   retryDrawer: () => {
     const id = get().selectedId;
-    set({ dataState: get().dataState === "error" ? "ready" : get().dataState });
     if (id) get().openRecord(id);
   },
 
@@ -187,30 +221,23 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (!c || get().saving) return;
     set({ saving: true });
     try {
-      await updateEnrollmentStatus(get().failNext);
-      const at = new Date();
+      const updated = await sendJson(`/api/enrollments/${encodeURIComponent(c.id)}/status`, "PATCH", { status: c.to });
+      const record = toEnrollmentRecord(updated);
       set((st) => ({
         saving: false,
         confirm: null,
-        draftStatus: c.to,
-        records: st.records.map((r) =>
-          r.id === c.id
-            ? { ...r, status: c.to, history: [{ from: c.from, to: c.to, admin: "Hadiza Aliyu", at }, ...r.history] }
-            : r,
-        ),
-        audit: [
-          { at, admin: "Hadiza Aliyu", action: "Status change", enrollee: c.name, from: c.from, to: c.to },
-          ...st.audit,
-        ],
+        draftStatus: record.status,
+        records: st.records.map((r) => (r.id === c.id ? record : r)),
       }));
       get().pushToast({
         kind: "ok",
         title: "Enrollment status updated",
         body: `${c.name} is now ${c.to}. The change is recorded in the audit log.`,
       });
+      get().hydrateAudit();
     } catch (err) {
       const rec = get().records.find((r) => r.id === c.id);
-      set({ saving: false, confirm: null, draftStatus: rec ? rec.status : null, failNext: false });
+      set({ saving: false, confirm: null, draftStatus: rec ? rec.status : null });
       get().pushToast({
         kind: "err",
         title: "Status update failed",
@@ -227,21 +254,56 @@ export const useAppStore = create<AppState>((set, get) => ({
   resetAuditFilters: () => set({ auditFilters: EMPTY_AUDIT_FILTERS }),
 
   userDialog: null,
+  userDialogSubmitting: false,
   openInvite: () => set({ userDialog: { kind: "invite" } }),
-  openEditRole: (name) => set({ userDialog: { kind: "role", name } }),
-  openDeactivate: (name, reactivate) => set({ userDialog: { kind: "deactivate", name, reactivate } }),
+  openEditRole: (email, name, role) => set({ userDialog: { kind: "role", email, name, role } }),
+  openDeactivate: (email, name, reactivate) => set({ userDialog: { kind: "deactivate", email, name, reactivate } }),
   closeUserDialog: () => set({ userDialog: null }),
-  confirmUserDialog: () => {
-    const ud = get().userDialog;
-    if (!ud) return;
-    const title =
-      ud.kind === "invite" ? "User registered" : ud.kind === "role" ? "Role updated" : "Account updated";
-    set({ userDialog: null });
-    get().pushToast({
-      kind: "ok",
-      title,
-      body: "Interface demonstration only — no account changes are saved in this prototype.",
-    });
+  registerUser: async (payload) => {
+    set({ userDialogSubmitting: true });
+    try {
+      await sendJson("/api/users", "POST", payload);
+      set({ userDialog: null, userDialogSubmitting: false });
+      get().pushToast({ kind: "ok", title: "User registered", body: `${payload.name} can now sign in with ${payload.email}.` });
+      get().hydrateUsers();
+      return true;
+    } catch (err) {
+      set({ userDialogSubmitting: false });
+      get().pushToast({ kind: "err", title: "Registration failed", body: (err as Error).message });
+      return false;
+    }
+  },
+  changeUserRole: async (email, role) => {
+    set({ userDialogSubmitting: true });
+    try {
+      await sendJson(`/api/users/${encodeURIComponent(email)}`, "PATCH", { role });
+      set({ userDialog: null, userDialogSubmitting: false });
+      get().pushToast({ kind: "ok", title: "Role updated", body: `${email} is now ${role}.` });
+      get().hydrateUsers();
+      return true;
+    } catch (err) {
+      set({ userDialogSubmitting: false });
+      get().pushToast({ kind: "err", title: "Role update failed", body: (err as Error).message });
+      return false;
+    }
+  },
+  setUserAccount: async (email, account) => {
+    set({ userDialogSubmitting: true });
+    try {
+      await sendJson(`/api/users/${encodeURIComponent(email)}`, "PATCH", { account });
+      set({ userDialog: null, userDialogSubmitting: false });
+      get().pushToast({
+        kind: "ok",
+        title: account === "Active" ? "Account reactivated" : "Account deactivated",
+        body: `${email} ${account === "Active" ? "can sign in again." : "no longer has access."}`,
+      });
+      get().hydrateUsers();
+      return true;
+    } catch (err) {
+      set({ userDialogSubmitting: false });
+      get().pushToast({ kind: "err", title: "Account update failed", body: (err as Error).message });
+      return false;
+    }
   },
 
   toasts: [],
@@ -267,8 +329,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const esc = (v: unknown) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
     const body = rows.map((r) =>
       [
-        r.id, r.first, r.last, r.other || "N/A", r.nin, fmt(r.dob), r.gender, r.marital,
-        r.disability, r.address, r.phone, r.facility, r.status, r.channel, r.note || "N/A", fmt(r.expiry),
+        r.id, r.first, r.last, r.other || "N/A", r.nin, fmtDate(r.dob), r.gender, r.marital,
+        r.disability, r.address, r.phone, r.facility, r.status, r.channel, r.note || "N/A", fmtDate(r.expiry),
       ]
         .map(esc)
         .join(","),
@@ -281,18 +343,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     URL.revokeObjectURL(a.href);
     get().pushToast({ kind: "ok", title: "Export ready", body: `${rows.length} filtered records exported to CSV.` });
   },
-
-  hydrateFromLive: async () => {
-    try {
-      const res = await fetch("/api/enrollments");
-      const json = (await res.json()) as { configured: boolean; records: EnrollmentRecord[] };
-      if (json.configured && json.records.length > 0) {
-        set({ records: json.records.map(reviveRecordDates) });
-      }
-    } catch {
-      // No live source configured or reachable — keep the demo data.
-    }
-  },
 }));
 
-export { ADMINS };
+function fmtDate(d: Date) {
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}

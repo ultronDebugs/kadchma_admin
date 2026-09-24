@@ -1,12 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { ArrowCounterClockwise, DownloadSimple, X } from "@phosphor-icons/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppStore } from "@/lib/store";
-import { FACILITIES } from "@/lib/mock-data";
 import { filterRecords, hasActiveFilters } from "@/lib/selectors";
 import type { Filters } from "@/lib/types";
 
@@ -55,6 +55,11 @@ export function FiltersPanel() {
   const records = useAppStore((s) => s.records);
   const exportCsv = useAppStore((s) => s.exportCsv);
 
+  const facilities = useMemo(
+    () => Array.from(new Set(records.map((r) => r.facility).filter(Boolean))).sort(),
+    [records],
+  );
+
   const active = hasActiveFilters(filters);
 
   const chipDefs: { key: keyof Filters; label: string }[] = [
@@ -87,7 +92,7 @@ export function FiltersPanel() {
           <Label htmlFor="f-nin">Search by NIN</Label>
           <Input id="f-nin" type="search" placeholder="0000 0000 000" value={filters.nin} onChange={(e) => setFilter("nin", e.target.value)} />
         </div>
-        <FilterSelect id="f-facility" label="Facility" value={filters.facility} onChange={(v) => setFilter("facility", v)} placeholder="All facilities" options={FACILITIES} />
+        <FilterSelect id="f-facility" label="Facility" value={filters.facility} onChange={(v) => setFilter("facility", v)} placeholder="All facilities" options={facilities} />
         <FilterSelect id="f-gender" label="Gender" value={filters.gender} onChange={(v) => setFilter("gender", v)} placeholder="All" options={["Female", "Male"]} />
         <FilterSelect id="f-marital" label="Marital status" value={filters.marital} onChange={(v) => setFilter("marital", v)} placeholder="All" options={["Single", "Married", "Divorced", "Widowed"]} />
         <FilterSelect id="f-status" label="Enrollment status" value={filters.status} onChange={(v) => setFilter("status", v)} placeholder="All statuses" options={["Active", "Pending", "Expired", "Suspended", "Inactive"]} />

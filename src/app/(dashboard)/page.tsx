@@ -13,7 +13,6 @@ export default function EnrollmentPage() {
             enrollment status. Every other field is read-only.
           </p>
         </div>
-        <div className="text-[12px] text-muted-foreground">Records fetched from KADCHMA enrollment database · synced 05 Sep 2026, 09:12</div>
       </header>
 
       <SummaryCards />

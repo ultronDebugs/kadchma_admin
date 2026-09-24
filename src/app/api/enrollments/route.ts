@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ensureIndexes, findByNin, insertEnrollment, listEnrollments } from "@/lib/enrollment-repo";
-import { toEnrollmentRecord } from "@/lib/enrollment-mapping";
+import { normalizeIncomingStatus, toEnrollmentRecord } from "@/lib/enrollment-mapping";
 import { isMongoConfigured } from "@/lib/mongodb";
+import { getSessionUser } from "@/lib/session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,11 +13,21 @@ function isAuthorized(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const nin = req.nextUrl.searchParams.get("nin");
+
+  // ?nin= is the bot's server-to-server duplicate check (API key); a full
+  // listing is the dashboard's own request (staff session).
+  if (nin) {
+    if (!isAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } else {
+    const session = await getSessionUser();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   if (!isMongoConfigured()) {
     return NextResponse.json({ configured: false, records: [] });
   }
   try {
-    const nin = req.nextUrl.searchParams.get("nin");
     const docs = nin ? await findByNin(nin) : await listEnrollments();
     return NextResponse.json({ configured: true, records: docs.map(toEnrollmentRecord) });
   } catch (err) {
@@ -86,7 +97,7 @@ export async function POST(req: NextRequest) {
       payment_reference: str(body.payment_reference),
       payment_status: str(body.payment_status),
       payment_proof_note: str(body.payment_proof_note),
-      status: str(body.status),
+      status: normalizeIncomingStatus(str(body.status)),
       enrolled_at: str(body.enrolled_at),
       contact_channel: str(body.contact_channel) || "WhatsApp",
       contact_id: str(body.contact_id),

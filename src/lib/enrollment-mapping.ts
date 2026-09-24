@@ -1,13 +1,23 @@
 import type { EnrollmentRecord, Status } from "@/lib/types";
 import type { StoredEnrollment } from "@/lib/enrollment-repo";
 
-// The WhatsApp bot never collects marital status, disability, or a picture,
-// so those fields are labelled rather than guessed.
-const STATUS_FROM_STORE: Record<string, Status> = {
+const DASHBOARD_STATUSES: Status[] = ["Active", "Pending", "Expired", "Suspended", "Inactive"];
+
+// The bot speaks its own enrollment vocabulary ("Enrolled", "Pending
+// Payment", "Pending Review"); storage always holds the dashboard's
+// vocabulary so a later staff-driven status change and this mapping never
+// disagree on what a stored value means.
+const STATUS_FROM_BOT: Record<string, Status> = {
   Enrolled: "Active",
   "Pending Payment": "Pending",
   "Pending Review": "Pending",
 };
+
+/** Normalizes any incoming status (bot vocabulary or dashboard vocabulary) to the dashboard's Status — call this at every write. */
+export function normalizeIncomingStatus(value: string): Status {
+  if (DASHBOARD_STATUSES.includes(value as Status)) return value as Status;
+  return STATUS_FROM_BOT[value] ?? "Pending";
+}
 
 function parseDdMmYyyy(value: string): Date {
   const [d, m, y] = value.split("/").map(Number);
@@ -31,18 +41,19 @@ export function toEnrollmentRecord(doc: StoredEnrollment): EnrollmentRecord {
     nin: doc.NIN || "",
     dob: parseDdMmYyyy(doc.date_of_birth || ""),
     gender: doc.gender === "Female" ? "Female" : "Male",
+    // The WhatsApp bot never collects marital status, disability, or a
+    // picture, so those fields are labelled rather than guessed.
     marital: "Not recorded",
     disability: "Not recorded",
     address: doc.address || "",
     phone: doc.phone_number || "",
     facility: doc.facility_of_choice || "",
     hasPicture: false,
-    status: STATUS_FROM_STORE[doc.status] ?? "Pending",
+    status: DASHBOARD_STATUSES.includes(doc.status as Status) ? (doc.status as Status) : "Pending",
     channel: doc.contact_channel || "WhatsApp",
     note: doc.payment_status
       ? `Payment ${doc.payment_status.toLowerCase()}${doc.payment_proof_note ? " — " + doc.payment_proof_note : ""}`
       : "",
     expiry: oneYearAfter(enrolledAt),
-    history: [],
   };
 }
