@@ -3,6 +3,7 @@ import { ensureIndexes, findByNin, insertEnrollment, listEnrollments } from "@/l
 import { normalizeIncomingStatus, toEnrollmentRecord } from "@/lib/enrollment-mapping";
 import { isMongoConfigured } from "@/lib/mongodb";
 import { getSessionUser } from "@/lib/session";
+import { consumePhotoForContact } from "@/lib/photo-repo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,9 +79,11 @@ export async function POST(req: NextRequest) {
 
   const str = (v: unknown) => String(v ?? "").trim();
   const enrollmentId = str(body.enrollment_id) || generateEnrollmentId();
+  const contactId = str(body.contact_id);
 
   try {
     await ensureIndexes();
+    const staged = contactId ? await consumePhotoForContact(contactId) : null;
     await insertEnrollment({
       enrollment_id: enrollmentId,
       first_name: str(body.first_name),
@@ -100,12 +103,15 @@ export async function POST(req: NextRequest) {
       status: normalizeIncomingStatus(str(body.status)),
       enrolled_at: str(body.enrolled_at),
       contact_channel: str(body.contact_channel) || "WhatsApp",
-      contact_id: str(body.contact_id),
+      contact_id: contactId,
+      has_photo: Boolean(staged),
+      photo_mime_type: staged?.mime_type ?? "",
+      photo_base64: staged?.photo_base64 ?? "",
       next_of_kin_name: str(body.next_of_kin_name),
       next_of_kin_phone: str(body.next_of_kin_phone),
       next_of_kin_relationship: str(body.next_of_kin_relationship),
     });
-    return NextResponse.json({ success: true, enrollment_id: enrollmentId }, { status: 201 });
+    return NextResponse.json({ success: true, enrollment_id: enrollmentId, photo_attached: Boolean(staged) }, { status: 201 });
   } catch (err) {
     if ((err as { code?: number }).code === 11000) {
       return NextResponse.json({ error: `enrollment_id ${enrollmentId} already exists` }, { status: 409 });

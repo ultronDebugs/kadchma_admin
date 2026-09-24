@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowLeft, CircleNotch, ClockCounterClockwise, Image as ImageIcon, UserCircleDashed, WarningCircle, ClockCountdown, WarningOctagon, X } from "@phosphor-icons/react";
+import { ArrowLeft, CircleNotch, ClockCounterClockwise, WarningCircle, ClockCountdown, WarningOctagon, X } from "@phosphor-icons/react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge, InitialsAvatar } from "@/components/status-badge";
+import { EnrollmentPhoto } from "@/components/enrollment/enrollment-photo";
 import { useAppStore } from "@/lib/store";
 import { STATUSES, daysTo, fmt, fmtDT, na } from "@/lib/mock-data";
 import { historyForEnrollment } from "@/lib/selectors";
@@ -115,13 +116,11 @@ export function RecordDrawer() {
             <section>
               <h3 className="mb-3 text-[11px] font-medium tracking-wide text-primary uppercase">Personal information</h3>
               <div className="mb-3 flex items-center gap-3 border-b pb-3">
-                <div className="flex size-[46px] flex-none items-center justify-center rounded-md bg-muted text-muted-foreground">
-                  {rec.hasPicture ? <ImageIcon size={19} /> : <UserCircleDashed size={19} />}
-                </div>
+                <EnrollmentPhoto key={rec.id} enrollmentId={rec.id} hasPicture={rec.hasPicture} />
                 <div>
                   <div className="text-[12px] text-muted-foreground">Picture</div>
                   <div className="text-[13.5px]">
-                    {rec.hasPicture ? "Photograph on file · captured at enrollment" : "N/A — no photograph captured"}
+                    {rec.hasPicture ? "Photograph on file · tap to view full size" : "N/A — no photograph captured"}
                   </div>
                 </div>
               </div>

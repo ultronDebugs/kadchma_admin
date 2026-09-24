@@ -41,14 +41,15 @@ export function toEnrollmentRecord(doc: StoredEnrollment): EnrollmentRecord {
     nin: doc.NIN || "",
     dob: parseDdMmYyyy(doc.date_of_birth || ""),
     gender: doc.gender === "Female" ? "Female" : "Male",
-    // The WhatsApp bot never collects marital status, disability, or a
-    // picture, so those fields are labelled rather than guessed.
+    // The bot never collects marital status or disability, so those fields
+    // are labelled rather than guessed. A picture is optional — hasPicture
+    // reflects whether one was actually attached at enrollment time.
     marital: "Not recorded",
     disability: "Not recorded",
     address: doc.address || "",
     phone: doc.phone_number || "",
     facility: doc.facility_of_choice || "",
-    hasPicture: false,
+    hasPicture: Boolean(doc.has_photo),
     status: DASHBOARD_STATUSES.includes(doc.status as Status) ? (doc.status as Status) : "Pending",
     channel: doc.contact_channel || "WhatsApp",
     note: doc.payment_status

@@ -22,7 +22,10 @@ export type StoredEnrollment = {
   status: string;
   enrolled_at: string; // ISO 8601
   contact_channel: string; // "WhatsApp" | "Instagram"
-  contact_id: string; // platform sender id, for resending messages
+  contact_id: string; // platform sender id, for resending messages and matching a staged photo
+  has_photo: boolean;
+  photo_mime_type: string;
+  photo_base64: string; // kept out of list/lookup projections — fetched only via findPhoto
   next_of_kin_name: string;
   next_of_kin_phone: string;
   next_of_kin_relationship: string;
@@ -30,7 +33,10 @@ export type StoredEnrollment = {
 };
 
 const COLLECTION = "enrollments";
-const PROJECT_OUT_ID = { projection: { _id: 0 } } as const;
+// Photo data is potentially hundreds of KB — never load it for a list or
+// a lookup that only needs the record's other fields.
+const PROJECT_OUT_PHOTO = { projection: { _id: 0, photo_base64: 0 } } as const;
+const PROJECT_ONLY_PHOTO = { projection: { _id: 0, photo_base64: 1, photo_mime_type: 1 } } as const;
 
 async function collection() {
   const db = await getDb();
@@ -45,12 +51,12 @@ export async function ensureIndexes() {
 
 export async function listEnrollments(): Promise<StoredEnrollment[]> {
   const col = await collection();
-  return col.find({}, PROJECT_OUT_ID).sort({ created_at: -1 }).toArray();
+  return col.find({}, PROJECT_OUT_PHOTO).sort({ created_at: -1 }).toArray();
 }
 
 export async function findByNin(nin: string): Promise<StoredEnrollment[]> {
   const col = await collection();
-  return col.find({ NIN: nin }, PROJECT_OUT_ID).toArray();
+  return col.find({ NIN: nin }, PROJECT_OUT_PHOTO).toArray();
 }
 
 export async function insertEnrollment(doc: Omit<StoredEnrollment, "created_at">): Promise<void> {
@@ -60,7 +66,12 @@ export async function insertEnrollment(doc: Omit<StoredEnrollment, "created_at">
 
 export async function findByEnrollmentId(id: string): Promise<StoredEnrollment | null> {
   const col = await collection();
-  return col.findOne({ enrollment_id: id }, PROJECT_OUT_ID);
+  return col.findOne({ enrollment_id: id }, PROJECT_OUT_PHOTO);
+}
+
+export async function findPhotoByEnrollmentId(id: string): Promise<Pick<StoredEnrollment, "photo_base64" | "photo_mime_type"> | null> {
+  const col = await collection();
+  return col.findOne({ enrollment_id: id }, PROJECT_ONLY_PHOTO);
 }
 
 export async function updateEnrollmentByEnrollmentId(
@@ -68,5 +79,5 @@ export async function updateEnrollmentByEnrollmentId(
   patch: Partial<Omit<StoredEnrollment, "enrollment_id" | "created_at">>,
 ): Promise<StoredEnrollment | null> {
   const col = await collection();
-  return col.findOneAndUpdate({ enrollment_id: id }, { $set: patch }, { returnDocument: "after", projection: { _id: 0 } });
+  return col.findOneAndUpdate({ enrollment_id: id }, { $set: patch }, { returnDocument: "after", projection: PROJECT_OUT_PHOTO.projection });
 }
