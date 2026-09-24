@@ -183,7 +183,7 @@
       "parameters": {
         "toolDescription": "Use this tool to check whether an enrollee already exists in the KADCHMA admin dashboard's database, by NIN (National Identification Number), once it has been collected. Do NOT treat phone number as unique or as a basis for rejecting an enrollment — multiple family members legitimately share one household phone number. Pass the 11-digit nin as a query parameter; if the response's records array is non-empty, that NIN already has a record — inform the user and offer support instead of creating a new entry.",
         "method": "GET",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/enrollments",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/enrollments",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -199,7 +199,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             }
           ]
         }
@@ -217,13 +217,13 @@
       "parameters": {
         "toolDescription": "Use this tool to save a new enrollee's details to the KADCHMA admin dashboard (replaces the old Google Sheets append — same data, new destination: the kadchma_admin Next.js app's own database). Call this ONLY after the user has confirmed their summary with YES and AFTER a payment attempt has been made. You must pass ALL of the following fields:\n\n- first_name, last_name, other_name (empty string if skipped)\n- phone_number, date_of_birth (DD/MM/YYYY), gender, address\n- plan_type: exactly \"Individual\" or \"Family\"\n- facility_of_choice: exact facility name from get_enrollment_facilities\n- NIN: REQUIRED — the enrollee's 11-digit NIN. Never pass an empty string.\n- email (empty string if not provided)\n- payment_reference: the Paystack reference code from generate_paystack_payment\n- payment_status: \"Paid\" if payment is confirmed, \"Pending\" if not yet confirmed\n- status: \"Enrolled\" if payment_status is Paid, otherwise \"Pending Payment\"\n- enrolled_at: current datetime in ISO 8601 format e.g. 2026-06-03T14:30:00\n- next_of_kin_name, next_of_kin_phone, next_of_kin_relationship (all REQUIRED)\n\nYou do not need to generate enrollment_id — the server assigns it and returns it in the response; quote that value back to the user as their Enrollment ID. Call this tool immediately once the enrollee confirms. Do NOT call it twice for the same enrollee.",
         "method": "POST",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/enrollments",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/enrollments",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -309,13 +309,13 @@
     {
       "parameters": {
         "method": "PATCH",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/enrollments/{{ encodeURIComponent($json.enrollment_id) }}",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/enrollments/{{ encodeURIComponent($json.enrollment_id) }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -553,7 +553,7 @@
       "parameters": {
         "toolDescription": "Use this tool to check whether an enrollee already exists in the KADCHMA admin dashboard's database, by NIN (National Identification Number), once it has been collected. Do NOT treat phone number as unique or as a basis for rejecting an enrollment — multiple family members legitimately share one household phone number. Pass the 11-digit nin as a query parameter; if the response's records array is non-empty, that NIN already has a record — inform the user and offer support instead of creating a new entry.",
         "method": "GET",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/enrollments",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/enrollments",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -569,7 +569,7 @@
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             }
           ]
         }
@@ -587,13 +587,13 @@
       "parameters": {
         "toolDescription": "Use this tool to save a new enrollee's details to the KADCHMA admin dashboard (replaces the old Google Sheets append — same data, new destination: the kadchma_admin Next.js app's own database). Call this ONLY after the user has confirmed their summary with YES and AFTER a payment attempt has been made. You must pass ALL of the following fields:\n\n- first_name, last_name, other_name (empty string if skipped)\n- phone_number, date_of_birth (DD/MM/YYYY), gender, address\n- plan_type: exactly \"Individual\" or \"Family\"\n- facility_of_choice: exact facility name from get_enrollment_facilities\n- NIN: REQUIRED — the enrollee's 11-digit NIN. Never pass an empty string.\n- email (empty string if not provided)\n- payment_reference: the Paystack reference code from generate_paystack_payment\n- payment_status: \"Paid\" if payment is confirmed, \"Pending\" if not yet confirmed\n- status: \"Enrolled\" if payment_status is Paid, otherwise \"Pending Payment\"\n- enrolled_at: current datetime in ISO 8601 format e.g. 2026-06-03T14:30:00\n- next_of_kin_name, next_of_kin_phone, next_of_kin_relationship (all REQUIRED)\n\nYou do not need to generate enrollment_id — the server assigns it and returns it in the response; quote that value back to the user as their Enrollment ID. Call this tool immediately once the enrollee confirms. Do NOT call it twice for the same enrollee.",
         "method": "POST",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/enrollments",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/enrollments",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -816,13 +816,13 @@
       "parameters": {
         "toolDescription": "Use this tool to submit a complaint or report an issue raised by a user (e.g. payment not reflecting, facility refusing service, card not received, poor service quality, or any other complaint) to the KADCHMA admin dashboard. Call this whenever a user says they want to report a problem, file a complaint, or raise an issue.\n\nYou must pass:\n- enrollment_id: the user's enrollment ID if known, otherwise empty string\n- full_name: the complainant's full name\n- phone_number: the complainant's phone number\n- complaint_category: one of 'Payment Issue', 'Facility Issue', 'Service Quality', 'ID Card Not Received', 'Staff Conduct', or 'Other'\n- complaint_details: a clear, full description of the issue in the user's own words\n\nYou do not need to generate complaint_id — the server assigns it and returns it in the response; quote that value back to the user as their Complaint ID.\n\nAfter saving, confirm to the user with their complaint_id and let them know the KADCHMA support team will follow up. Do not promise a specific resolution timeframe beyond 'as soon as possible'.",
         "method": "POST",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/complaints",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/complaints",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -848,13 +848,13 @@
       "parameters": {
         "toolDescription": "Use this tool to submit a complaint or report an issue raised by a user (e.g. payment not reflecting, facility refusing service, card not received, poor service quality, or any other complaint) to the KADCHMA admin dashboard. Call this whenever a user says they want to report a problem, file a complaint, or raise an issue.\n\nYou must pass:\n- enrollment_id: the user's enrollment ID if known, otherwise empty string\n- full_name: the complainant's full name\n- phone_number: the complainant's phone number\n- complaint_category: one of 'Payment Issue', 'Facility Issue', 'Service Quality', 'ID Card Not Received', 'Staff Conduct', or 'Other'\n- complaint_details: a clear, full description of the issue in the user's own words\n\nYou do not need to generate complaint_id — the server assigns it and returns it in the response; quote that value back to the user as their Complaint ID.\n\nAfter saving, confirm to the user with their complaint_id and let them know the KADCHMA support team will follow up. Do not promise a specific resolution timeframe beyond 'as soon as possible'.",
         "method": "POST",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/complaints",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/complaints",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -1411,13 +1411,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/photo-staging",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/photo-staging",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -1487,13 +1487,13 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "={{ $env.KADCHMA_ADMIN_API_URL }}/api/photo-staging",
+        "url": "={{ $vars.KADCHMA_ADMIN_API_URL }}/api/photo-staging",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Authorization",
-              "value": "=Bearer {{ $env.KADCHMA_ENROLLMENTS_API_KEY }}"
+              "value": "=Bearer {{ $vars.KADCHMA_ENROLLMENTS_API_KEY }}"
             },
             {
               "name": "Content-Type",
